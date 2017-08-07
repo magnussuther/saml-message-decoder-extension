@@ -1,0 +1,106 @@
+@font-face {
+  font-family: 'Roboto';
+  src: url('./static/roboto.woff2') format('woff2');
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+.section {
+  word-wrap:break-word;
+}
+
+.section:nth-child(even) {
+}
+
+#main-container {
+  min-width: 800px;
+}
+
+.message-container {}
+
+.message-title {
+  font-size: 1em;
+  padding: 1em;
+  background: rgba(3, 169, 244, 255);
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+}
+
+.message-body {
+  padding: 1em;
+  background: #f8f8f8;
+  border: 1px solid #ccc;
+  border-radius: 0 0 .5em .5em;
+  font-family: monospace;
+  line-height: 1.5;
+}
+
+.message-parameter {
+  padding: 1em;
+}
+
+.message-parameters span {
+  font-weight: bold;
+  font-family: 'Roboto', sans-serif;
+  position: relative;
+  top: .5em;
+  background: #fff;
+  padding: .5em 1em;
+  display: inline;
+}
+
+.message-parameters textarea {
+  width: 95%;
+  max-height: 2em;
+  padding: 1em;
+  resize: none;
+  border-style: dotted;
+  font-family: 'Roboto', sans-serif;
+  border: none;
+  border-top: 1px dotted;
+}
+
+.nav-prev, .nav-next {
+  background: rgba(3, 169, 244, 255);
+  width: 1em;
+  height: 1em;
+  display: none;
+  position: absolute;
+  top: 50%;
+  padding: 1em;
+  font-size: 2em;
+  color: #fff;
+  left: .3em;
+  font-family: monospace;
+  line-height: 1;
+}
+
+.nav-next {
+  right: .3em;
+  left: initial;
+  padding-left: 1.2em;
+  padding-right: .8em;
+}
+
+code {
+  white-space: pre-wrap;
+}
+
+.fp-controlArrow {
+  border-color: transparent red transparent red !important;
+  display: none;
+}
+
+#no-messages {
+  color: #666;
+  text-align: center;
+  font-size: 2em;
+  font-family: 'Roboto', sans-serif;
+}
+
+#no-messages p {
+  margin: 1em;
+}

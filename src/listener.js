@@ -3,10 +3,18 @@
 /* global localStorage: false */
 /* global URL: false */
 /* global chrome: false */
+/* global browser: false */
 /* global $: false */
 /* global btoa: false */
 
 import pako from 'pako';
+
+let browserApi = null;
+if (chrome) {
+  browserApi = chrome;
+} else {
+  browserApi = browser;
+}
 
 function storeInLocalStorage(message) {
   console.log('storeInLocalStorage: incoming message: ', message);
@@ -18,7 +26,7 @@ function storeInLocalStorage(message) {
 
   storedMessages.push(message);
 
-  chrome.storage.sync.get({
+  browserApi.storage.local.get({
     maxNumberOfStoredMessages: 10, // default
   }, (items) => {
     if (storedMessages.length > items.maxNumberOfStoredMessages) {
@@ -118,38 +126,33 @@ function processSamlPostBindingMessage(data) {
   }
 }
 
-const downloadURI = (uri, name) => {
-  const link = document.createElement('a');
-  link.download = name;
-  link.href = uri;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  // delete link;
-};
-
 const renderContextMenu = () => {
-  chrome.contextMenus.removeAll();
+  browserApi.contextMenus.removeAll();
 
-  chrome.storage.sync.get({
+  browserApi.storage.local.get({
     scrollingDirection: 'horizontally', // default
     maxNumberOfStoredMessages: 10,
   }, (items) => {
-    chrome.contextMenus.create({
+    browserApi.contextMenus.create({
       title: 'Export stored messages',
       contexts: ['browser_action'],
       onclick: () => {
         const msgs = JSON.stringify(JSON.parse(localStorage.messages), null, 2);
         console.log('msgs: ', msgs);
-        downloadURI(`data:text/json;base64;charset=UTF-8,${btoa(msgs)}`, 'SAML Message Decoder Export.json');
+        const blob = new Blob([msgs], { type: 'text/json;charset=utf-8' });
+        browserApi.downloads.download({
+          url: URL.createObjectURL(blob), // data: URLs doesn't work in Firefox
+          filename: 'SAML Message Decoder Export.json',
+          saveAs: true,
+        });
       },
     });
 
-    chrome.contextMenus.create({
+    browserApi.contextMenus.create({
       title: `${items.scrollingDirection === 'horizontally' ? '\u2611' : '\u2610'} Scroll horizontally (default)`,
       contexts: ['browser_action'],
       onclick: () => {
-        chrome.storage.sync.set({
+        browserApi.storage.local.set({
           scrollingDirection: 'horizontally',
         });
 
@@ -157,11 +160,11 @@ const renderContextMenu = () => {
       },
     });
 
-    chrome.contextMenus.create({
+    browserApi.contextMenus.create({
       title: `${items.scrollingDirection === 'vertically' ? '\u2611' : '\u2610'} Scroll vertically`,
       contexts: ['browser_action'],
       onclick: () => {
-        chrome.storage.sync.set({
+        browserApi.storage.local.set({
           scrollingDirection: 'vertically',
         });
 
@@ -169,11 +172,11 @@ const renderContextMenu = () => {
       },
     });
 
-    chrome.contextMenus.create({
+    browserApi.contextMenus.create({
       title: `${items.maxNumberOfStoredMessages === 10 ? '\u2611' : '\u2610'} Keep 10 last messages only (default)`,
       contexts: ['browser_action'],
       onclick: () => {
-        chrome.storage.sync.set({
+        browserApi.storage.local.set({
           maxNumberOfStoredMessages: 10,
         });
 
@@ -181,11 +184,11 @@ const renderContextMenu = () => {
       },
     });
 
-    chrome.contextMenus.create({
+    browserApi.contextMenus.create({
       title: `${items.maxNumberOfStoredMessages === 100 ? '\u2611' : '\u2610'} Keep 100 last messages`,
       contexts: ['browser_action'],
       onclick: () => {
-        chrome.storage.sync.set({
+        browserApi.storage.local.set({
           maxNumberOfStoredMessages: 100,
         });
 
@@ -193,7 +196,7 @@ const renderContextMenu = () => {
       },
     });
 
-    chrome.contextMenus.create({
+    browserApi.contextMenus.create({
       title: 'Clear stored messages',
       contexts: ['browser_action'],
       onclick: () => {
@@ -204,7 +207,7 @@ const renderContextMenu = () => {
 };
 
 $().ready(() => {
-  chrome.webRequest.onBeforeRequest.addListener(
+  browserApi.webRequest.onBeforeRequest.addListener(
     (data) => {
       if (data.method === 'GET') {
         processSamlRedirectBindingMessage(data);

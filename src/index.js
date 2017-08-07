@@ -3,6 +3,7 @@
 /* global $: false */
 /* global localStorage: false */
 /* global chrome: false */
+/* global browser: false */
 
 import 'jquery-mousewheel';
 
@@ -26,6 +27,13 @@ import './static/roboto.woff2';
 import './style.css';
 
 let toggleNextPrevButtons = () => {};
+
+let browserApi = null;
+if (chrome) {
+  browserApi = chrome;
+} else {
+  browserApi = browser;
+}
 
 const preprocessMessages = (messages) => {
   const preprocessedMessages = [];
@@ -115,8 +123,8 @@ $(document).ready(() => {
     messages = preprocessMessages(messages);
     console.timeEnd('preprocessMessages');
 
-    if (chrome.storage) {
-      chrome.storage.sync.get({
+    if (browserApi.storage) {
+      browserApi.storage.local.get({
         scrollingDirection: '',
       }, (items) => {
         renderView(messages, items.scrollingDirection);

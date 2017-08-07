@@ -58,27 +58,22 @@ const renderView = (messages, scrollingDirection) => {
   if (scrollingDirection === 'vertically') {
     direction = 'vertical';
   }
-  console.time('parse-template');
+
   const template = $(`#${direction}-message-template`).html();
   Mustache.parse(template);
   const messageTemplate = $('#single-message-template').html();
   Mustache.parse(messageTemplate);
-  console.timeEnd('parse-template');
 
-  console.time('render-template');
   const rendered = Mustache.render(template, {
     messages,
   }, { message: messageTemplate });
   $('#main-container').html(rendered);
-  console.timeEnd('render-template');
 
-  console.time('highlight');
   hljs.initHighlightingOnLoad();
   $('pre code').each((i, block) => {
     hljs.highlightBlock(block);
   });
-  console.timeEnd('highlight');
-  console.time('fullpage');
+
   $('#main-container').fullpage({
     // Allows us to scroll vertically inside a section/slide
     scrollOverflow: true,
@@ -107,21 +102,15 @@ const renderView = (messages, scrollingDirection) => {
   } else {
     $.fn.fullpage.moveTo(messages.length, 0); // last section, first and only slide
   }
-  console.timeEnd('fullpage');
 };
 
 $(document).ready(() => {
   let messages = [];
 
-  console.time('preprocessMessages');
   messages = localStorage.messages;
   if (messages && messages.length > 0) {
     messages = JSON.parse(messages);
-    console.log(messages);
-
-    console.log('preprocessMessages', preprocessMessages);
     messages = preprocessMessages(messages);
-    console.timeEnd('preprocessMessages');
 
     if (browserApi.storage) {
       browserApi.storage.local.get({

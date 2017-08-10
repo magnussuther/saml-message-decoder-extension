@@ -20,8 +20,12 @@ import {
   html as beautifyHtml,
 } from 'js-beautify';
 
+import Clipboard from 'clipboard/dist/clipboard';
+
 import hljs from 'highlight.js';
 import 'highlight.js/styles/github.css';
+
+import 'primer-tooltips/build/build.css';
 
 import './static/roboto.woff2';
 import './style.css';
@@ -104,6 +108,62 @@ const renderView = (messages, scrollingDirection) => {
   }
 };
 
+const attachEventListeners = () => {
+  $('button.copy-messages-button').on('mouseleave', () => {
+    $('button.copy-messages-button').removeClass('tooltipped tooltipped-s');
+  });
+
+  $('button.copy-messages-button').click((button) => {
+    $('button.copy-messages-button').addClass('tooltipped tooltipped-s');
+    const currentlyCheckedIndexes = $('input.message-copy-checkbox:checked')
+      .map((i, e) => $(e).data('checkbox-index')).get();
+
+    if (currentlyCheckedIndexes.length === 0) {
+      // Only copy the one selected message
+      currentlyCheckedIndexes.push($(button.currentTarget).data('message-index'));
+    }
+
+    const temporaryClipboardTarget = $('<div />');
+
+    $.each(currentlyCheckedIndexes.sort(), (i, messageIndex) => {
+      temporaryClipboardTarget.append($(`code[data-message-index="${messageIndex}"]`).clone());
+      temporaryClipboardTarget.append('<br>');
+    });
+
+    // Target must be in DOM and 'not hidden' for Clipboard to work
+    $('#temp-container').append(temporaryClipboardTarget);
+    const clipboard = new Clipboard('button.copy-messages-button', {
+      target: () => temporaryClipboardTarget[0],
+    });
+    clipboard.on('success', (e) => {
+      temporaryClipboardTarget.remove();
+      e.clearSelection();
+    });
+    clipboard.on('error', (e) => {
+      console.err('clipboard error', e);
+      temporaryClipboardTarget.remove();
+      e.clearSelection();
+    });
+  });
+
+  $('input.message-copy-checkbox').on('change', () => {
+    const currentlyCheckedIndexes = $('input.message-copy-checkbox:checked')
+      .map((i, e) => $(e).data('checkbox-index')).get();
+
+    if (currentlyCheckedIndexes.length === 0) {
+      $('.copy-messages-button').text('Copy this message');
+      $('.clear-copy-selections').hide();
+    } else {
+      $('.copy-messages-button').text(`Copy ${currentlyCheckedIndexes.length} messages`);
+      $('.clear-copy-selections').show();
+    }
+  });
+
+  $('.clear-copy-selections').click(() => {
+    $('input.message-copy-checkbox').prop('checked', false).change();
+  });
+};
+
 $(document).ready(() => {
   let messages = [];
 
@@ -117,9 +177,11 @@ $(document).ready(() => {
         scrollingDirection: '',
       }, (items) => {
         renderView(messages, items.scrollingDirection);
+        attachEventListeners();
       });
     } else {
       renderView(messages, 'horizontally');
+      attachEventListeners();
     }
   } else {
     const template = $('#nothing-to-display-template').html();

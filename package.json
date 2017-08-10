@@ -1,6 +1,6 @@
 {
   "name": "saml-message-decoder-extension",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A browser extension to display SAML messages",
   "main": "src/index.js",
   "scripts": {
@@ -34,12 +34,14 @@
     "webpack-dev-server": "^2.5.1"
   },
   "dependencies": {
+    "clipboard": "^1.7.1",
     "fullpage.js": "^2.9.4",
     "highlight.js": "^9.12.0",
     "jquery": "^3.2.1",
     "jquery-mousewheel": "^3.1.13",
     "js-beautify": "^1.6.14",
     "mustache": "^2.3.0",
-    "pako": "^1.0.5"
+    "pako": "^1.0.5",
+    "primer-tooltips": "^1.2.0"
   }
 }

@@ -33,8 +33,23 @@
 	</script>
 	<script id="single-message-template" type="x-tmpl-mustache">
 		<div class="message-container">
-			<h2 class="message-title"># {{index}} - {{parameter}} via {{binding}} binding, at {{time}} (UTC)</h2>
-			<div class="message-body"><pre><code class="xml">{{formattedContent}}</code></pre></div>
+			<h2 class="message-title">
+        # {{index}} - {{parameter}} via {{binding}} binding, at {{time}} (UTC)
+
+        <div class="message-copy-toolbar">
+          <button class="copy-messages-button tooltipped-no-delay" data-message-index="{{index}}" aria-label="Copied to clipboard!">
+            Copy this message
+          </button>
+          <button class="clear-copy-selections" style="display: none;">
+            Clear selections
+          </button>
+          <div class="message-copy-checkbox-container">
+            <input data-checkbox-index="{{index}}" type="checkbox" class="message-copy-checkbox" id="message-copy-checkbox-{{index}}" />
+            <label for="message-copy-checkbox-{{index}}"></label>
+          </div>
+        </div>
+      </h2>
+			<div class="message-body"><pre><code class="xml" data-message-index="{{index}}">{{formattedContent}}</code></pre></div>
 			<div class="message-parameters">
 				<dl>
 					{{#parameters}}
@@ -48,9 +63,10 @@
 		</div>
 	</script>
 
-
 	<div id="main-container"></div>
   <b class="nav-prev">&#9664;</b>
   <b class="nav-next">&#9654;</b>
+  <div id="temp-container" style="width: 0; height: 0"></div>
+  <!-- temp-container must be 'visible', or clipboard.js won't work -->
 </body>
 </html>

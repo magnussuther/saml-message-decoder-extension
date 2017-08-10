@@ -124,8 +124,8 @@ const attachEventListeners = () => {
     }
 
     const temporaryClipboardTarget = $('<div />');
-
-    $.each(currentlyCheckedIndexes.sort(), (i, messageIndex) => {
+    const sortedCurrentlyCheckedIndexes = currentlyCheckedIndexes.sort((a, b) => a - b);
+    $.each(sortedCurrentlyCheckedIndexes, (i, messageIndex) => {
       temporaryClipboardTarget.append($(`code[data-message-index="${messageIndex}"]`).clone());
       temporaryClipboardTarget.append('<br>');
     });

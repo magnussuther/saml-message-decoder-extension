@@ -106,9 +106,8 @@ code {
 }
 
 .message-copy-toolbar {
-    position: absolute;
-    right: 1em;
-    top: .3em;
+    float: right;
+    margin-top: -0.7em;
 }
 
 button.copy-messages-button, button.clear-copy-selections {

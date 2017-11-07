@@ -5,6 +5,7 @@
 /* global browser: false */
 /* global $: false */
 /* global Blob: false */
+/* global TextDecoder: false */
 
 import pako from 'pako';
 
@@ -16,6 +17,8 @@ if (chrome) {
 }
 
 function storeInLocalStorage(message) {
+  console.log('storeInLocalStorage', message);
+
   let storedMessages = [];
   if (localStorage.messages && localStorage.messages.length !== 0) {
     storedMessages = JSON.parse(localStorage.messages);
@@ -43,6 +46,7 @@ const processSamlRedirectBindingMessage = (data) => {
     const response = url.searchParams.get('SAMLResponse');
 
     if (!request && !response) {
+      console.log('Not a SAML message, aborting');
       return;
     }
 
@@ -68,36 +72,67 @@ const processSamlRedirectBindingMessage = (data) => {
   }
 };
 
+function parseRawPostData(formData, arrayBufferList) {
+  const form = formData || {};
+
+  let decodedString = '';
+  for (let i = 0; i !== arrayBufferList.length; i += 1) {
+    const dv = new DataView(arrayBufferList[i].bytes);
+    const decoder = new TextDecoder();
+    decodedString += decoder.decode(dv);
+  }
+
+  const parameterName = decodedString.substring(0, decodedString.indexOf('='));
+
+  if (parameterName !== 'SAMLRequest' && parameterName !== 'SAMLResponse') {
+    console.log('Not a SAML message');
+    return null;
+  }
+
+  form[parameterName] = decodeURIComponent(decodedString.substring(decodedString.indexOf('=') + 1));
+
+  return form;
+}
+
 function processSamlPostBindingMessage(data) {
   const body = data.requestBody;
   if (body) {
-    const formData = body.formData;
+    let request = null;
+    let response = null;
+    let formData = body.formData;
+
+    if (body.raw) {
+      formData = parseRawPostData(formData, body.raw);
+    }
 
     if (formData) {
-      const request = formData.SAMLRequest;
-      const response = formData.SAMLResponse;
-
-      if (!request && !response) {
-        // Nothing to us to see here
-        return;
-      }
-
-      const message = request || response;
-      const decoded = window.atob(message);
-
-      const parameters = [];
-      for (const [name, value] of Object.entries(formData)) {
-        parameters.push({ name, value });
-      }
-
-      storeInLocalStorage({
-        time: new Date().toUTCString(),
-        parameter: request ? 'SAMLRequest' : 'SAMLResponse',
-        binding: 'post',
-        content: decoded,
-        parameters,
-      });
+      request = formData.SAMLRequest;
+      response = formData.SAMLResponse;
+    } else {
+      console.log('Missing POST parameters, aborting');
+      return;
     }
+
+    if (!request && !response) {
+      console.log('Not a SAML message, aborting');
+      return;
+    }
+
+    const message = request || response;
+    const decoded = window.atob(message);
+
+    const parameters = [];
+    for (const [name, value] of Object.entries(formData)) {
+      parameters.push({ name, value });
+    }
+
+    storeInLocalStorage({
+      time: new Date().toUTCString(),
+      parameter: request ? 'SAMLRequest' : 'SAMLResponse',
+      binding: 'post',
+      content: decoded,
+      parameters,
+    });
   }
 }
 

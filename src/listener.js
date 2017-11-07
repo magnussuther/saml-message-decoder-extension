@@ -17,8 +17,6 @@ if (chrome) {
 }
 
 function storeInLocalStorage(message) {
-  console.log('storeInLocalStorage', message);
-
   let storedMessages = [];
   if (localStorage.messages && localStorage.messages.length !== 0) {
     storedMessages = JSON.parse(localStorage.messages);

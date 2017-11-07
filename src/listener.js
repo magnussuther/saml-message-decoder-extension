@@ -16,7 +16,7 @@ if (chrome) {
   browserApi = browser;
 }
 
-function storeInLocalStorage(message) {
+const storeInLocalStorage = (message) => {
   let storedMessages = [];
   if (localStorage.messages && localStorage.messages.length !== 0) {
     storedMessages = JSON.parse(localStorage.messages);
@@ -34,7 +34,7 @@ function storeInLocalStorage(message) {
 
     localStorage.messages = JSON.stringify(storedMessages);
   });
-}
+};
 
 const processSamlRedirectBindingMessage = (data) => {
   const url = new URL(data.url);
@@ -70,7 +70,7 @@ const processSamlRedirectBindingMessage = (data) => {
   }
 };
 
-function parseRawPostData(formData, arrayBufferList) {
+const parseRawPostData = (formData, arrayBufferList) => {
   const form = formData || {};
 
   let decodedString = '';
@@ -90,9 +90,9 @@ function parseRawPostData(formData, arrayBufferList) {
   form[parameterName] = decodeURIComponent(decodedString.substring(decodedString.indexOf('=') + 1));
 
   return form;
-}
+};
 
-function processSamlPostBindingMessage(data) {
+const processSamlPostBindingMessage = (data) => {
   const body = data.requestBody;
   if (body) {
     let request = null;
@@ -132,7 +132,7 @@ function processSamlPostBindingMessage(data) {
       parameters,
     });
   }
-}
+};
 
 const renderContextMenu = () => {
   browserApi.contextMenus.removeAll();

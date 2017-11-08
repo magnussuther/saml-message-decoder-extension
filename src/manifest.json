@@ -3,7 +3,7 @@
 
   "name": "SAML Message Decoder",
   "description": "Collects and displays SAML messages",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "browser_action": {
     "default_popup": "index.html",
     "default_icon" : {

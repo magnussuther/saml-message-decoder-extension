@@ -1,6 +1,7 @@
 /* global window: false */
 /* global localStorage: false */
 /* global URL: false */
+/* global URLSearchParams: false */
 /* global chrome: false */
 /* global browser: false */
 /* global $: false */
@@ -17,6 +18,8 @@ if (chrome) {
 }
 
 const storeInLocalStorage = (message) => {
+  console.log('Storing message in LocalStorage');
+
   let storedMessages = [];
   if (localStorage.messages && localStorage.messages.length !== 0) {
     storedMessages = JSON.parse(localStorage.messages);
@@ -77,17 +80,15 @@ const parseRawPostData = (formData, arrayBufferList) => {
   for (let i = 0; i !== arrayBufferList.length; i += 1) {
     const dv = new DataView(arrayBufferList[i].bytes);
     const decoder = new TextDecoder();
-    decodedString += decoder.decode(dv);
+    const partial = decoder.decode(dv);
+    decodedString += partial;
   }
 
-  const parameterName = decodedString.substring(0, decodedString.indexOf('='));
+  const params = new URLSearchParams(decodedString);
 
-  if (parameterName !== 'SAMLRequest' && parameterName !== 'SAMLResponse') {
-    console.log('Not a SAML message');
-    return null;
+  for(const param of params.entries()) {
+    form[param[0]] = decodeURIComponent(param[1]);
   }
-
-  form[parameterName] = decodeURIComponent(decodedString.substring(decodedString.indexOf('=') + 1));
 
   return form;
 };
@@ -100,6 +101,7 @@ const processSamlPostBindingMessage = (data) => {
     let formData = body.formData;
 
     if (body.raw) {
+      console.log('POST parameters sent as ArrayBuffers, parsing...');
       formData = parseRawPostData(formData, body.raw);
     }
 

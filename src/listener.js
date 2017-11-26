@@ -158,30 +158,6 @@ const renderContextMenu = () => {
     });
 
     browserApi.contextMenus.create({
-      title: `${items.scrollingDirection === 'horizontally' ? '\u2611' : '\u2610'} Scroll horizontally (default)`,
-      contexts: ['browser_action'],
-      onclick: () => {
-        browserApi.storage.local.set({
-          scrollingDirection: 'horizontally',
-        });
-
-        renderContextMenu();
-      },
-    });
-
-    browserApi.contextMenus.create({
-      title: `${items.scrollingDirection === 'vertically' ? '\u2611' : '\u2610'} Scroll vertically`,
-      contexts: ['browser_action'],
-      onclick: () => {
-        browserApi.storage.local.set({
-          scrollingDirection: 'vertically',
-        });
-
-        renderContextMenu();
-      },
-    });
-
-    browserApi.contextMenus.create({
       title: `${items.maxNumberOfStoredMessages === 10 ? '\u2611' : '\u2610'} Keep 10 last messages only (default)`,
       contexts: ['browser_action'],
       onclick: () => {

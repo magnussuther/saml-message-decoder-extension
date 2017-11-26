@@ -32,10 +32,6 @@ module.exports = {
       $: 'jquery',
       jQuery: 'jquery',
     }),
-    // Needed to make IScroll globally accessible.
-    new webpack.ProvidePlugin({
-      IScroll: 'fullpage.js/vendors/scrolloverflow',
-    }),
     new HtmlWebpackPlugin({
       template: './src/index.html',
       chunks: ['index'],

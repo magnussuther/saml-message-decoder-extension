@@ -8,25 +8,33 @@
   padding: 0;
 }
 
-.section {
-  word-wrap:break-word;
-}
-
-.section:nth-child(even) {
+html {
+  min-height: 600px;
 }
 
 #main-container {
-  min-width: 800px;
+  min-width: 785px;
+  font-size: 10px;
 }
 
-.message-container {}
+.message-container {
+  display: none;
+}
 
 .message-title {
-  font-size: 1em;
+  font-size: 12px;
   padding: 1em;
   background: rgba(3, 169, 244, 255);
   color: #fff;
   font-family: 'Roboto', sans-serif;
+}
+
+#no-messages .message-title {
+  font-size: 20px;
+}
+
+#no-messages img {
+  width: 65%;
 }
 
 .message-body {
@@ -53,6 +61,7 @@
 }
 
 .message-parameters textarea {
+  font-size: 12px;
   width: 95%;
   max-height: 2em;
   padding: 1em;
@@ -68,7 +77,7 @@
   width: 1em;
   height: 1em;
   display: none;
-  position: absolute;
+  position: fixed;
   top: 50%;
   padding: 1em;
   font-size: 2em;
@@ -83,10 +92,6 @@
   left: initial;
   padding-left: 1.2em;
   padding-right: .8em;
-}
-
-code {
-  white-space: pre-wrap;
 }
 
 .fp-controlArrow {
@@ -106,23 +111,23 @@ code {
 }
 
 .message-copy-toolbar {
-    float: right;
-    margin-top: -0.7em;
+  float: right;
+  margin-top: -0.7em;
 }
 
 button.copy-messages-button, button.clear-copy-selections {
-    background: #03a9f4;
-    border: none;
-    color: #fff;
-    padding: 1em;
-    cursor: pointer;
-    text-decoration: underline;
-    font-family: 'Roboto', sans-serif;
-    font-size: 0.8em;
+  background: #03a9f4;
+  border: none;
+  color: #fff;
+  padding: 1em;
+  cursor: pointer;
+  text-decoration: underline;
+  font-family: 'Roboto', sans-serif;
+  font-size: 0.8em;
 }
 
 button.copy-messages-button:hover, button.clear-copy-selections:hover {
-    background: #56beec;
+  background: #56beec;
 }
 
 .message-copy-checkbox-container {
@@ -166,4 +171,19 @@ button.copy-messages-button:hover, button.clear-copy-selections:hover {
 }
 .message-copy-checkbox-container input[type=checkbox]:checked + label:after {
   opacity: 1;
+}
+
+code {
+  overflow-x: hidden !important;
+  white-space: pre-wrap;
+}
+
+code .text-node {
+  font-weight: bold;
+}
+
+code .text-node-long {
+  display: block;
+  font-weight: bold;
+  word-break: break-word;
 }

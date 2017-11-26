@@ -10,29 +10,19 @@
   <script id="nothing-to-display-template" type="x-tmpl-mustache">
     <div id='no-messages'>
       <h2 class="message-title">SAML Message Decoder</h2>
-      <p>Once any SAML messages are spotted they will be listed here instead of this text.</p>
-      <p style="font-size: .7em;">In the meantime, did you notice that the right&#x2011;click menu has a few more features now?</p>
-      <img src="static/right-click-menu.png" />
+      <p>Once any SAML messages are spotted they will be listed here instead of this image.</p>
+      <img src="static/screenshot.png" />
     </div>
   </script>
 	<script id="horizontal-message-template" type="x-tmpl-mustache">
-		<div class="section fp-auto-height fp-noscroll">
-		{{#messages}}
-			<div class="slide">
-				{{>message}}
-			</div>
-		{{/messages}}
+		<div class="messages-container">
+			{{#messages}}
+					{{>message}}
+			{{/messages}}
 		</div>
 	</script>
-	<script id="vertical-message-template" type="x-tmpl-mustache">
-		{{#messages}}
-			<div class="section fp-auto-height">
-				{{>message}}
-			</div>
-		{{/messages}}
-	</script>
 	<script id="single-message-template" type="x-tmpl-mustache">
-		<div class="message-container">
+		<section class="message-container" data-message-container-index="{{index}}">
 			<h2 class="message-title">
         # {{index}} - {{parameter}} via {{binding}} binding, at {{time}} (UTC)
 
@@ -60,7 +50,7 @@
 					{{/parameters}}
 				</dl>
 			</div>
-		</div>
+		</section>
 	</script>
 
 	<div id="main-container"></div>

@@ -2,18 +2,8 @@
 /* global document: false */
 /* global $: false */
 /* global localStorage: false */
-/* global chrome: false */
-/* global browser: false */
 
 import 'jquery-mousewheel';
-
-// scrolloverflow is imported in webpack.config.js instead, otherwise
-// ISCroll won't be globally accessible.
-// import IScroll from 'fullpage.js/vendors/scrolloverflow.js';
-
-import 'fullpage.js/dist/jquery.fullpage.css';
-import 'fullpage.js/dist/jquery.fullpage';
-
 import Mustache from 'mustache';
 
 import {
@@ -30,15 +20,6 @@ import 'primer-tooltips/build/build.css';
 import './static/roboto.woff2';
 import './style.css';
 
-let toggleNextPrevButtons = () => {};
-
-let browserApi = null;
-if (chrome) {
-  browserApi = chrome;
-} else {
-  browserApi = browser;
-}
-
 const preprocessMessages = (messages) => {
   const preprocessedMessages = [];
   $.each(messages, (i, message) => {
@@ -48,7 +29,6 @@ const preprocessMessages = (messages) => {
     preprocessedMessages[preprocessedMessages.length - 1]
       .formattedContent = beautifyHtml(message.content, {
         indent_size: 2,
-        // wrap_line_length: 100,
         brace_style: 'expand',
         wrap_attributes: 'force-aligned',
       });
@@ -57,13 +37,46 @@ const preprocessMessages = (messages) => {
   return preprocessedMessages;
 };
 
-const renderView = (messages, scrollingDirection) => {
-  let direction = 'horizontal';
-  if (scrollingDirection === 'vertically') {
-    direction = 'vertical';
+const getCurrentlyVisibleMessageNumber = () => {
+  const currentlyVisible = $('section.message-container:visible')[0];
+  const currentIndex = $(currentlyVisible).data('message-container-index');
+  return currentIndex;
+};
+
+const toggleNextPrevButtons = (event) => {
+  const visibleMessageNumber = getCurrentlyVisibleMessageNumber();
+
+  const numberOfMessages = $('section.message-container').length;
+
+  if (event.pageX < 80 && visibleMessageNumber > 1) {
+    $('.nav-prev').show();
+  } else if (event.pageX > window.innerWidth - 80
+      && visibleMessageNumber !== numberOfMessages) {
+    $('.nav-next').show();
+  } else {
+    $('.nav-prev').hide();
+    $('.nav-next').hide();
+  }
+};
+
+const moveToMessageSection = (nextMessageNumber) => {
+  if (!Number.isInteger(nextMessageNumber)) {
+    console.error('nextMessageNumber is not a number', nextMessageNumber);
+    return;
   }
 
-  const template = $(`#${direction}-message-template`).html();
+  const $messageToDisplay = $(`[data-message-container-index=${nextMessageNumber}]`);
+  if ($messageToDisplay.length === 0) {
+    console.warn('Preventing navigation to out-of-range nextMessageNumber', nextMessageNumber);
+    return;
+  }
+
+  $('section.message-container').hide();
+  $messageToDisplay.show();
+};
+
+const renderView = (messages) => {
+  const template = $('#horizontal-message-template').html();
   Mustache.parse(template);
   const messageTemplate = $('#single-message-template').html();
   Mustache.parse(messageTemplate);
@@ -76,36 +89,20 @@ const renderView = (messages, scrollingDirection) => {
   hljs.initHighlightingOnLoad();
   $('pre code').each((i, block) => {
     hljs.highlightBlock(block);
+
+    const $textNodes = $(block).contents()
+      .filter((_, node) => node.nodeType === 3); // Text nodes
+
+    $textNodes.wrap((index) => {
+      const node = $textNodes[index];
+      const text = $(node).text();
+      const whitespace = text.replace(/\s/g, '').length === 0 ? '-whitespace' : '';
+      const long = text.length > 200 ? '-long' : '';
+      return `<span class="text-node${whitespace}${long}"></span>`;
+    });
   });
 
-  $('#main-container').fullpage({
-    // Allows us to scroll vertically inside a section/slide
-    scrollOverflow: true,
-    scrollOverflowOptions: {
-      disablePointer: true,
-    },
-    loopHorizontal: false,
-    controlArrows: false,
-    afterSlideLoad: (anchorLink, index, slideAnchor, slideIndex) => {
-      toggleNextPrevButtons = (event) => {
-        if (event.pageX < 80 && slideIndex !== 0) {
-          $('.nav-prev').show();
-        } else if (event.pageX > window.innerWidth - 80 && slideIndex !== messages.length - 1) {
-          // do something
-          $('.nav-next').show();
-        } else {
-          $('.nav-prev').hide();
-          $('.nav-next').hide();
-        }
-      };
-    },
-  });
-
-  if (direction === 'horizontal') {
-    $.fn.fullpage.moveTo(1, messages.length - 1); // last slide, first and only section
-  } else {
-    $.fn.fullpage.moveTo(messages.length, 0); // last section, first and only slide
-  }
+  moveToMessageSection(messages.length); // Move to the last message
 };
 
 const attachEventListeners = () => {
@@ -172,17 +169,8 @@ $(document).ready(() => {
     messages = JSON.parse(messages);
     messages = preprocessMessages(messages);
 
-    if (browserApi.storage) {
-      browserApi.storage.local.get({
-        scrollingDirection: '',
-      }, (items) => {
-        renderView(messages, items.scrollingDirection);
-        attachEventListeners();
-      });
-    } else {
-      renderView(messages, 'horizontally');
-      attachEventListeners();
-    }
+    renderView(messages);
+    attachEventListeners();
   } else {
     const template = $('#nothing-to-display-template').html();
     const rendered = Mustache.render(template);
@@ -191,13 +179,17 @@ $(document).ready(() => {
 });
 
 $(document).keydown((e) => {
+  const currentIndex = getCurrentlyVisibleMessageNumber();
+
   switch (e.key) {
     case 'ArrowUp':
-      $.fn.fullpage.moveSlideLeft();
+    case 'ArrowLeft':
+      moveToMessageSection(currentIndex - 1);
       break;
 
     case 'ArrowDown':
-      $.fn.fullpage.moveSlideRight();
+    case 'ArrowRight':
+      moveToMessageSection(currentIndex + 1);
       break;
 
     default:
@@ -208,11 +200,15 @@ $(document).keydown((e) => {
 });
 
 $(document).mousewheel((event) => {
+  const currentIndex = getCurrentlyVisibleMessageNumber();
+
   if (event.deltaX < 0) {
-    $.fn.fullpage.moveSlideLeft();
+    moveToMessageSection(currentIndex - 1);
+    event.preventDefault();
   }
   if (event.deltaX > 0) {
-    $.fn.fullpage.moveSlideRight();
+    moveToMessageSection(currentIndex + 1);
+    event.preventDefault();
   }
 });
 
@@ -221,9 +217,11 @@ $(document).on('mousemove', (event) => {
 });
 
 $('.nav-prev').click(() => {
-  $.fn.fullpage.moveSlideLeft();
+  const currentIndex = getCurrentlyVisibleMessageNumber();
+  moveToMessageSection(currentIndex - 1);
 });
 
 $('.nav-next').click(() => {
-  $.fn.fullpage.moveSlideRight();
+  const currentIndex = getCurrentlyVisibleMessageNumber();
+  moveToMessageSection(currentIndex + 1);
 });

@@ -93,32 +93,45 @@ const parseRawPostData = (formData, arrayBufferList) => {
   return form;
 };
 
+const extractPostedMessageParameter = (formData) => {
+  const recognizedParameters = ['SAMLRequest', 'SAMLResponse', 'EidSignRequest', 'EidSignResponse'];
+
+  let message = null;
+  let parameter = null;
+
+  recognizedParameters.forEach((param) => {
+    const msg = formData[param];
+    if (msg) {
+      parameter = param;
+      message = msg;
+    }
+  });
+
+  return { message, parameter };
+};
+
 const processSamlPostBindingMessage = (data) => {
   const body = data.requestBody;
   if (body) {
-    let request = null;
-    let response = null;
     let formData = body.formData;
 
     if (body.raw) {
       console.log('POST parameters sent as ArrayBuffers, parsing...');
       formData = parseRawPostData(formData, body.raw);
     }
-
-    if (formData) {
-      request = formData.SAMLRequest;
-      response = formData.SAMLResponse;
-    } else {
+      
+    if (!formData) {
       console.log('Missing POST parameters, aborting');
       return;
     }
 
-    if (!request && !response) {
-      console.log('Not a SAML message, aborting');
+    const { message, parameter } = extractPostedMessageParameter(formData);
+
+    if (!message) {
+      console.log('Not a recognized message, aborting');
       return;
     }
 
-    const message = request || response;
     const decoded = window.atob(message);
 
     const parameters = [];
@@ -128,7 +141,7 @@ const processSamlPostBindingMessage = (data) => {
 
     storeInLocalStorage({
       time: new Date().toUTCString(),
-      parameter: request ? 'SAMLRequest' : 'SAMLResponse',
+      parameter,
       binding: 'post',
       content: decoded,
       parameters,

@@ -1,6 +1,6 @@
 {
   "name": "saml-message-decoder-extension",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "A browser extension to display SAML messages",
   "main": "src/index.js",
   "scripts": {

@@ -61,6 +61,9 @@ const processSamlRedirectBindingMessage = (data) => {
     const parameters = [];
     url.searchParams.forEach((value, name) => {
       parameters.push({ name, value });
+      if(parameters.name === "j_password") {    // Checking the paswword parameter
+        paramaters.value = "****************";  // if the password exists, then we hide the Value
+      };
     });
 
     storeInLocalStorage({
@@ -119,7 +122,7 @@ const processSamlPostBindingMessage = (data) => {
       console.log('POST parameters sent as ArrayBuffers, parsing...');
       formData = parseRawPostData(formData, body.raw);
     }
-      
+
     if (!formData) {
       console.log('Missing POST parameters, aborting');
       return;

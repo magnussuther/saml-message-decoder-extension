@@ -132,8 +132,12 @@ const processSamlPostBindingMessage = (data) => {
       return;
     }
 
-    const decoded = window.atob(message);
-
+    var decoded = window.atob(message);
+    if (decoded.indexOf("xml version") == -1) {
+      const inflatedBytes = pako.inflateRaw(decoded, { to: 'string' });
+      const inflated = decodeURIComponent(inflatedBytes);
+      decoded = inflated;
+    }
     const parameters = [];
     for (const [name, value] of Object.entries(formData)) {
       parameters.push({ name, value });
